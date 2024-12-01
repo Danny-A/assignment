@@ -6,12 +6,14 @@ const FlightDetails = ({ flight }: { flight: Flight }) => {
       <a href={flight.url} className="flex items-baseline p-4 md:px-6 space-between">
         <span className="flex flex-1 gap-4">
           <span className="flex flex-col">
-            <time className="font-bold text-schiphol-blue" dateTime={flight.originalTime}>
-              {flight.originalTime}
-            </time>
             <time className="font-bold text-schiphol-blue" dateTime={flight.expectedTime}>
               {flight.expectedTime}
             </time>
+            {flight.originalTime !== flight.expectedTime && (
+              <time className="font-bold text-schiphol-grey-500 line-through" dateTime={flight.originalTime}>
+                {flight.originalTime}
+              </time>
+            )}
           </span>
           <span>
             <p className="text-schiphol-blue group-hover:underline">{flight.airport}</p>
