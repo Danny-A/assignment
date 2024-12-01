@@ -1,19 +1,42 @@
-import React from 'react';
+import debounce from 'lodash.debounce';
+import React, { useEffect, useMemo, useState } from 'react';
 import { MINIMUM_SEARCH_LENGTH, useFlights } from 'src/context/FlightContext';
 
 const SearchBar: React.FC = () => {
   const { searchAirport, setSearchAirport, filteredAirports, selectAirport } = useFlights();
+  const [inputValue, setInputValue] = useState('');
 
-  const handleAirportSelect = (airport: string) => {
-    selectAirport(airport);
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((airport: string) => {
+        setSearchAirport(airport);
+      }, 300),
+    [setSearchAirport],
+  );
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    debouncedSearch(value);
+    setInputValue(value);
   };
+
+  const handleSelect = (airport: string) => {
+    selectAirport(airport);
+    setInputValue('');
+  };
+
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
 
   return (
     <div className="relative">
       <input
         type="text"
-        value={searchAirport}
-        onChange={(e) => setSearchAirport(e.target.value)}
+        value={inputValue}
+        onChange={(e) => handleChange(e)}
         placeholder="Search for an airport..."
         className="w-full p-4 text-sm rounded-md z-20 relative"
       />
@@ -26,7 +49,7 @@ const SearchBar: React.FC = () => {
                 {filteredAirports.map((airport) => (
                   <li
                     key={airport}
-                    onClick={() => handleAirportSelect(airport)}
+                    onClick={() => handleSelect(airport)}
                     className="px-4 py-2 text-sm hover:bg-afternoon-blue hover:text-white cursor-pointer"
                   >
                     <p>{airport}</p>
